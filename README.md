@@ -1,1 +1,1 @@
-# boilerplate-mern-passport.js
+# boilerplate-mern-passport

@@ -1,0 +1,13 @@
+.NavContainer {
+  width: 100vw;
+  height: 100px;
+  background: black;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.NavContainer a {
+  color: white;
+  text-decoration: none;
+}

@@ -7,6 +7,10 @@ const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const bcrypt = require("bcryptjs");
 const dotenv = require("dotenv");
+const nodemailer = require("nodemailer");
+const ejs = require("ejs");
+const path = require("path");
+let appDir = path.dirname(require.main.filename);
 const UserInfo = require("./UserInfo.js");
 const LocalStrategy = passportLocal.Strategy;
 
@@ -41,26 +45,20 @@ app.use(passport.session());
 
 //Passport
 passport.use(
-  new LocalStrategy(
-    {
-      usernameField: "email",
-      passwordField: "passwd",
-    },
-    (username, password, done) => {
-      UserInfo.findOne({ username: username }, (err, user) => {
+  new LocalStrategy((username, password, done) => {
+    UserInfo.findOne({ username: username }, (err, user) => {
+      if (err) throw err;
+      if (!user) return done(null, false);
+      bcrypt.compare(password, user.password, (err, result) => {
         if (err) throw err;
-        if (!user) return done(null, false);
-        bcrypt.compare(password, user.password, (err, result) => {
-          if (err) throw err;
-          if (result === true) {
-            return done(null, user);
-          } else {
-            return done(null, false);
-          }
-        });
+        if (result === true) {
+          return done(null, user);
+        } else {
+          return done(null, false);
+        }
       });
-    }
-  )
+    });
+  })
 );
 
 passport.serializeUser((user, cb) => {
@@ -79,6 +77,58 @@ passport.deserializeUser((id, cb) => {
 });
 
 // Routes
+app.post("/checkname", async (req, res) => {
+  const { nickname } = req.body;
+  UserInfo.findOne({ nickname }, async (err, doc) => {
+    if (err) throw err;
+    if (doc) res.send("fail");
+    if (!doc) res.send("success");
+  });
+});
+
+app.post("/sendemail", async (req, res) => {
+  let authNum = Math.random().toString().substr(2, 6);
+  let emailTemplete;
+  ejs.renderFile(
+    appDir + "/template/authMail.ejs",
+    { authCode: authNum },
+    function (err, data) {
+      if (err) {
+        console.log(err);
+      }
+      emailTemplete = data;
+    }
+  );
+
+  let transporter = nodemailer.createTransport({
+    service: "gmail",
+    port: 587,
+    host: "smtp.gmail.com",
+    secure: false,
+    requireTLS: true,
+    auth: {
+      user: process.env.NODEMAILER_USER,
+      pass: process.env.NODEMAILER_PASSWORD,
+    },
+  });
+
+  let mailOptions = new Object({
+    from: "헬로",
+    to: req.body.email,
+    subject: "회원가입을 위한 인증번호입니다.",
+    html: emailTemplete,
+  });
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    }
+    console.log("Finish sending email : " + info.response);
+    res.send(authNum);
+    transporter.close();
+  });
+});
+
 app.post("/register", async (req, res) => {
   console.log(req.body);
   const { username, email, password } = req.body;
@@ -94,16 +144,19 @@ app.post("/register", async (req, res) => {
     return;
   }
 
-  UserInfo.findOne({ username }, async (err, doc) => {
+  UserInfo.findOne({ username: email }, async (err, doc) => {
+    console.log(email);
     if (err) throw err;
     if (doc) res.send("User Already Exists");
     if (!doc) {
+      console.log("go");
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = new UserInfo({
         nickname: username,
         username: email,
         password: hashedPassword,
       });
+      console.log(newUser);
       await newUser.save();
       res.send("success");
       console.log("success");

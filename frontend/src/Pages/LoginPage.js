@@ -32,12 +32,12 @@ function Login() {
     <div>
       <h1>Login</h1>
       <input
-        type="text"
+        type="email"
         placeholder="username"
         onChange={(e) => setUsername(e.target.value)}
       />
       <input
-        type="text"
+        type="password"
         placeholder="password"
         onChange={(e) => setPassword(e.target.value)}
       />

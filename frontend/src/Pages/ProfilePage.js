@@ -5,7 +5,7 @@ function ProfilePage() {
   const ctx = useContext(myContext);
   return (
     <div>
-      <h1>Current Login User : {ctx.username}</h1>
+      <h1>Current Login User : {ctx.nickname}</h1>
     </div>
   );
 }

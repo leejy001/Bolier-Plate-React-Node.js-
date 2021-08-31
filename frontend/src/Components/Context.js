@@ -10,6 +10,7 @@ function Context(props) {
     axios
       .get("http://localhost:4000/user", { withCredentials: true })
       .then((res) => {
+        console.log(res);
         setUser(res.data);
       });
   }, []);

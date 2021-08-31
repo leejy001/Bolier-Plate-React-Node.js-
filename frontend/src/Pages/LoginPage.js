@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import googleImg from "../assets/googleImage.png";
+import githubImg from "../assets/githubImage.png";
+import "../assets/css/loginPage.css";
 import axios from "axios";
 
 function Login() {
@@ -28,9 +31,27 @@ function Login() {
       );
   };
 
+  const googleLogin = () => {
+    window.open("http://localhost:4000/auth/google", "_self");
+  };
+
+  const githubLogin = () => {
+    window.open("http://localhost:4000/auth/github", "_self");
+  };
+
   return (
-    <div>
+    <div className="login-page">
       <h1>Login</h1>
+      <div className="login-form">
+        <div className="google-login" onClick={googleLogin}>
+          <img src={googleImg} alt="Google Icon" />
+          <p>Login With Google</p>
+        </div>
+        <div className="github-login" onClick={githubLogin}>
+          <img src={githubImg} alt="Github Icon" />
+          <p>Login With Github</p>
+        </div>
+      </div>
       <input
         type="email"
         placeholder="username"

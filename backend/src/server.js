@@ -13,6 +13,8 @@ const path = require("path");
 let appDir = path.dirname(require.main.filename);
 const UserInfo = require("./UserInfo.js");
 const LocalStrategy = passportLocal.Strategy;
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const GithubStrategy = require("passport-github").Strategy;
 
 dotenv.config();
 
@@ -52,8 +54,10 @@ passport.use(
       bcrypt.compare(password, user.password, (err, result) => {
         if (err) throw err;
         if (result === true) {
+          console.log("success");
           return done(null, user);
         } else {
+          console.log("fail");
           return done(null, false);
         }
       });
@@ -61,19 +65,90 @@ passport.use(
   })
 );
 
-passport.serializeUser((user, cb) => {
-  cb(null, user.id);
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: `${process.env.GOOGLE_ID}`,
+      clientSecret: `${process.env.GOOGLE_SECRET}`,
+      callbackURL: "/auth/google/callback",
+    },
+    function (acessTocken, refreshTocken, profile, cb) {
+      UserInfo.findOne({ googleId: profile.id }, async (err, doc) => {
+        if (err) {
+          return cb(err, null);
+        }
+
+        if (!doc) {
+          const newUser = new UserInfo({
+            googleId: profile.id,
+            username: profile.id,
+            nickname: profile.name.givenName,
+          });
+
+          await newUser.save();
+          cb(null, newUser);
+        }
+
+        if (doc) {
+          cb(null, doc);
+        }
+      });
+    }
+  )
+);
+
+passport.use(
+  new GithubStrategy(
+    {
+      clientID: `${process.env.GITHUB_ID}`,
+      clientSecret: `${process.env.GITHUB_SECRET}`,
+      callbackURL: "/auth/github/callback",
+    },
+    function (acessTocken, refreshTocken, profile, cb) {
+      UserInfo.findOne({ githubId: profile.id }, async (err, doc) => {
+        if (err) {
+          return cb(err, null);
+        }
+
+        if (!doc) {
+          const newUser = new UserInfo({
+            githubId: profile.id,
+            username: profile.id,
+            nickname: profile.username,
+          });
+
+          await newUser.save();
+          cb(null, newUser);
+        }
+
+        if (doc) {
+          cb(null, doc);
+        }
+      });
+    }
+  )
+);
+
+passport.serializeUser((user, done) => {
+  return done(null, user._id);
 });
 
-passport.deserializeUser((id, cb) => {
+passport.deserializeUser((id, done) => {
+  console.log("deserialize");
+  UserInfo.findById(id, (err, doc) => {
+    // Whatever we return goes to the client and binds to the req.user property
+    return done(null, doc);
+  });
+  /*
   UserInfo.findOne({ _id: id }, (err, user) => {
     const userInformation = {
       nickname: user.nickname,
       isAdmin: user.isAdmin,
       id: user._id,
     };
+    console.log(userInformation);
     cb(err, userInformation);
-  });
+  });*/
 });
 
 // Routes
@@ -163,6 +238,29 @@ app.post("/register", async (req, res) => {
     }
   });
 });
+
+app.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile"] })
+);
+
+app.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  function (req, res) {
+    res.redirect("http://localhost:3000/");
+  }
+);
+
+app.get("/auth/github", passport.authenticate("github"));
+
+app.get(
+  "/auth/github/callback",
+  passport.authenticate("github", { failureRedirect: "/login" }),
+  function (req, res) {
+    res.redirect("http://localhost:3000/");
+  }
+);
 
 app.post("/login", passport.authenticate("local"), (req, res) => {
   res.send("success");

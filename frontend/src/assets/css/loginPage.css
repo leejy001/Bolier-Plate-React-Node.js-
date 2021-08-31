@@ -1,0 +1,65 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;1,100;1,200;1,300&display=swap");
+.google-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 300px;
+  height: 50px;
+  background: #4385f4;
+  position: relative;
+  color: white;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  margin: 10px;
+}
+
+.google-login img {
+  width: 12.5%;
+  height: 100%;
+  object-fit: contain;
+  left: 10px;
+  border-radius: 3px;
+  position: absolute;
+}
+
+.github-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 300px;
+  height: 50px;
+  background: rgb(56, 56, 56);
+  position: relative;
+  color: white;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  margin: 10px;
+}
+
+.github-login img {
+  width: 12.5%;
+  height: 100%;
+  object-fit: contain;
+  left: 10px;
+  border-radius: 3px;
+  position: absolute;
+}
+
+.login-page {
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 600px;
+  flex-direction: column;
+  min-width: 40vw;
+}

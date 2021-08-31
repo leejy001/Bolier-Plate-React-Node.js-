@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { myContext } from "./Context";
-import "../assets/navbar.css";
+import "../assets/css/navbar.css";
 
 function Navbar() {
   const ctx = useContext(myContext);

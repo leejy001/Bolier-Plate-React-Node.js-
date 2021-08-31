@@ -7,7 +7,7 @@ import HomePage from "./Pages/HomePage";
 import LoginPage from "./Pages/LoginPage";
 import ProfilePage from "./Pages/ProfilePage";
 import RegisterPage from "./Pages/RegisterPage";
-import "./assets/main.css";
+import "./assets/css/main.css";
 
 function App() {
   const ctx = useContext(myContext);
